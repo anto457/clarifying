@@ -4,7 +4,7 @@
   const selfdiscovery_prompts = [
     "What would be your dream job?",
     "What is the think you most care about?",
-    "Prompt3",
+    "Are you stressed these days? If so, why?",
   ] as const;
 
   let selected_prompt = $state(
@@ -22,14 +22,22 @@
   }
 
   let stormId: number = 0;
-  let textInputs: string[] = [];
+  let textInputs: string[] = $state([]);
 
   let choice: number = $state(0);
 
-  function selectStorm(p0: number) {
-    choice = p0;
+  function selectStorm(val: number) {
+    choice = val;
     stormId = Date.now();
-    textInputs = [];
+
+    if (choice == 1) {
+      pickRandomPrompt();
+      textInputs = [""];
+    } else if (choice == 2) {
+      textInputs = ["", ""];
+    } else {
+      textInputs = [];
+    }
   }
 
   type Storm = {
@@ -50,7 +58,6 @@
 
   function saveStorm() {
     if (browser) {
-      //storms = [...storms, { id: Date.now(), text: "New" }];
       const newItem: Storm = { id: stormId, text: textInputs, choice: choice };
 
       storms = storms.some((t) => t.id === newItem.id)
@@ -69,7 +76,7 @@
   <div class="content">
     <div class="">
       <p class="center"><b>{selected_prompt}</b></p>
-      <textarea>t1</textarea>
+      <textarea bind:value={textInputs[0]}></textarea>
       <br />
       <br />
       <button onclick={saveStorm}>Save locally</button>
@@ -80,10 +87,10 @@
   <div class="content">
     <div class="">
       <p><b>Tough question I am overthinking:</b></p>
-      <textarea class="ta-question">t1</textarea>
+      <textarea class="ta-question" bind:value={textInputs[0]}></textarea>
       <br />
       <br />
-      <textarea>t2</textarea>
+      <textarea bind:value={textInputs[1]}></textarea>
       <br />
       <br />
       <button onclick={saveStorm}>Save locally</button>
@@ -93,11 +100,13 @@
   <div class="center content">
     <div class="">
       <h1>What do you want to clarify your thoughts about?</h1>
-      <button onclick={() => selectStorm(1)}>Self-discovery (guided)</button>
+      <button onclick={() => selectStorm(1)}>Self-discovery</button>
       <button onclick={() => selectStorm(2)}
-        >Tough question I am overthinking (open question)</button
+        >Tough question I am overthinking</button
       >
-      I hesitate between multiple options
+      <!-- <button onclick={() => selectStorm(3)} disabled
+        >I hesitate between multiple options</button
+      > -->
     </div>
   </div>
 
@@ -105,8 +114,7 @@
     <summary><b>Brainstorms archive</b></summary>
     {#each storms as storm}
       <div>
-        {storm.text}. {storm.choice}. {storm.id} Brainstorm this question/prompt
-        again
+        {storm.choice} - {storm.text}.
       </div>
     {/each}
   </details>
