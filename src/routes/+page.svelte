@@ -122,7 +122,7 @@
   <div class="footer">
     <p>
       Clarify is a simple text editor for clarifying your thoughts and avoiding
-      cognitive overload and overthinking.<br /><a href="/">Open-source</a>
+      cognitive overload and overthinking.<br /><a href="https://github.com/anto457/clarifying/">Open-source</a>
       and
       <i>fully private</i> (data never leaves your browser, it is saved to localStorage).
     </p>

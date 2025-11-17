@@ -10,7 +10,7 @@ export default {
       strict: true
     }),
     paths: {
-      base: process.env.NODE_ENV === 'production' ? '/clarifying' : ''
+      base: process.env.NODE_ENV === 'production' ? process.env.BASE_PATH : ''
     }
   }
 };
