@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import { page } from "$app/state";
   import { browser } from "$app/environment";
 
   const selfdiscovery_prompts = [
@@ -23,48 +21,26 @@
       ];
   }
 
-  // Check if content should be shown based on URL
-  const choice: string = $derived(page.url.searchParams.get("choice") ?? '');
-
-  let stormId: number = Date.now();
+  let stormId: number = 0;
   let textInputs: string[] = [];
 
-  function toggleContent(p0: string) {
-    const newUrl = new URL(page.url);
+  let choice: number = $state(0);
 
-    if (p0 == "0") {
-      stormId = 0;
-      textInputs = [];
-      // Hide content - remove the parameter
-      newUrl.searchParams.delete("choice");
-    } else if (p0 == "guided") {
-      stormId = Date.now();
-      textInputs = [];
-      
-      // Show content - add the parameter
-      newUrl.searchParams.set("choice", "guided");
-    } else if (p0 == "open") {
-      stormId = Date.now();
-      textInputs = [];
-
-      // Show content - add the parameter
-      newUrl.searchParams.set("choice", "open");
-    }
-
-    goto(newUrl, { keepFocus: true });
+  function selectStorm(p0: number) {
+    choice = p0;
+    stormId = Date.now();
+    textInputs = [];
   }
-
-  // let choice = $state("0");
 
   type Storm = {
     id: number;
     text: string[];
-    choice: string;
+    choice: number;
   };
 
   let storms = $state<Storm[]>([]);
 
-  // Load on mount
+  // Load data on mount
   if (browser) {
     const stored = localStorage.getItem("storms");
     if (stored) {
@@ -72,25 +48,22 @@
     }
   }
 
-  // Auto-save on change
-  $effect(() => {
+  function saveStorm() {
     if (browser) {
+      //storms = [...storms, { id: Date.now(), text: "New" }];
+      const newItem: Storm = { id: stormId, text: textInputs, choice: choice };
+
+      storms = storms.some((t) => t.id === newItem.id)
+        ? storms.map((t) => (t.id === newItem.id ? { ...t, ...newItem } : t))
+        : [...storms, newItem];
+
       localStorage.setItem("storms", JSON.stringify(storms));
     }
-  });
-
-  function saveStorm() {
-    //storms = [...storms, { id: Date.now(), text: "New" }];
-    const newItem:Storm = { id: stormId, text: textInputs, choice: choice };
-
-    storms = storms.some((t) => t.id === newItem.id)
-      ? storms.map((t) => (t.id === newItem.id ? { ...t, ...newItem } : t))
-      : [...storms, newItem];
   }
 </script>
 
-{#if choice == "guided"}
-  <a href="/">index</a>
+{#if choice == 1}
+  <button onclick={() => (choice = 0)}>index</button>
   <button onclick={pickRandomPrompt}>different prompt</button>
 
   <div class="content">
@@ -102,8 +75,8 @@
       <button onclick={saveStorm}>Save locally</button>
     </div>
   </div>
-{:else if choice == "open"}
-  <a href="/">index</a>
+{:else if choice == 2}
+  <button onclick={() => (choice = 0)}>index</button>
   <div class="content">
     <div class="">
       <p><b>Tough question I am overthinking:</b></p>
@@ -120,10 +93,8 @@
   <div class="center content">
     <div class="">
       <h1>What do you want to clarify your thoughts about?</h1>
-      <button onclick={() => toggleContent("guided")}
-        >Self-discovery (guided)</button
-      >
-      <button onclick={() => toggleContent("open")}
+      <button onclick={() => selectStorm(1)}>Self-discovery (guided)</button>
+      <button onclick={() => selectStorm(2)}
         >Tough question I am overthinking (open question)</button
       >
       I hesitate between multiple options
@@ -148,7 +119,6 @@
       <i>fully private</i> (data never leaves your browser, it is saved to localStorage).
     </p>
   </div>
-
 {/if}
 
 <style>
@@ -187,6 +157,6 @@
     height: 56px !important;
   }
   details {
-    margin-top: var(--space-2xl)
+    margin-top: var(--space-2xl);
   }
 </style>
